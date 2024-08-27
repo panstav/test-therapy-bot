@@ -1,0 +1,13 @@
+/.vscode
+
+/node_modules
+/npm-debug.log
+
+/.parcel-cache
+/parcel-bundle-reports
+
+/.netlify
+
+/dist
+
+.env
