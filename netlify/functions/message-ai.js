@@ -25,7 +25,7 @@ function queryAi(messages, { delayMs = 0 } = {}) {
 	return new Promise(resolve => setTimeout(resolve, delayMs)).then(() => fetchPrediction().catch(err => {
 		debugger;
 
-		if ([502, 429].includes(err.response.status)) return queryAi(messages, { delayMs: (delayMs || 2000) * 2 });
+		if ([502, 429].includes(err.status)) return queryAi(messages, { delayMs: (delayMs || 2000) * 2 });
 		console.error(err);
 		debugger;
 	}));
