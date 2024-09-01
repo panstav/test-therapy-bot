@@ -50,7 +50,7 @@ export default function Chat() {
 	};
 
 	const updateRtl = (text) => {
-		setInputClassName(isRtl(text) ? 'is-rtl' : '');
+		setInputClassName(isRtl(text) ? 'has-rtl' : '');
 	}
 
 	return <MainContainer>

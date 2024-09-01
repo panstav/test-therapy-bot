@@ -3,11 +3,14 @@
 
 @import styles/base.sass
 
+.is-rtl
+	direction: rtl
+
 .cs-message--outgoing .cs-message__content
 	background-color: #ccffc1
 
 .cs-message--outgoing ~ .cs-message--incoming, .cs-message--incoming ~ .cs-message--outgoing
 	margin-top: 1rem
 
-.cs-message.is-rtl .cs-message__html-content, .cs-message-input.is-rtl .cs-message-input__content-editor-container
+.cs-message.has-rtl .cs-message__html-content, .cs-message-input.has-rtl .cs-message-input__content-editor-container
 	direction: rtl
