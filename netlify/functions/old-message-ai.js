@@ -1,48 +1,19 @@
-const OpenAI = require("openai");
+const queryAi = require("./shared/chat-completion");
 
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY,
-	organization: process.env.OPENAI_ORG,
-	project: process.env.OPENAI_PROJECT,
-});
+exports.handler = async function (event) {
 
-exports.handler = async function (event, context) {
+	const messages = JSON.parse(event.body);
 
-	const messages = JSON.parse(event.body).map(({ message, direction = 'outgoing' }) => ({ content: message, role: direction === 'outgoing' ? 'user' : 'assistant' }));
-	const aiResponse = await queryAi(messages);
+	const aiResponse = await queryAi([
+		{ role: 'system', content: getSystemPrompt() },
+		...messages
+	]);
 
-	const resObj = {
-		statusCode: 200
+	return {
+		statusCode: 200,
+		body: JSON.stringify({ message: aiResponse.choices[0].message.content })
 	};
-
-	resObj.body = JSON.stringify({ message: aiResponse.choices[0].message.content });
-
-	return resObj;
 };
-
-function queryAi(messages, { delayMs = 0 } = {}) {
-
-	return new Promise(resolve => setTimeout(resolve, delayMs)).then(() => fetchPrediction().catch(err => {
-		debugger;
-
-		if ([502, 429].includes(err.status)) return queryAi(messages, { delayMs: (delayMs || 2000) * 2 });
-		console.error(err);
-		debugger;
-	}));
-
-	function fetchPrediction() {
-		return openai.chat.completions.create({
-			model: 'gpt-3.5-turbo',
-			max_tokens: 1000,
-			temperature: 0.5,
-			messages: [
-				{ role: 'system', content: getSystemPrompt() },
-				...messages
-			]
-		});
-	}
-
-}
 
 function getSystemPrompt() {
 	return `You are an interactive NVC (Nonviolent Communication) coach focused on showing empathy and helping users practice effective communication. Your primary goal is to guide users in NVC exercises through a compassionate and conversational tone. You prioritize flexibility, allowing users to lead the conversation while gently though constantly steering toward practicing NVC principles where appropriate.

@@ -1,5 +1,7 @@
 import { useRef } from "react";
 
+import fetchFunc from "../lib/fetch-func";
+
 export default function Login({ setUserLoggedIn }) {
 
 	const passwordRef = useRef();
@@ -13,16 +15,13 @@ export default function Login({ setUserLoggedIn }) {
 			return;
 		}
 
-		const response = await fetch('/.netlify/functions/login', {
-			method: 'POST',
-			body: JSON.stringify({ password }),
-			headers: {
-				'Content-Type': 'application/json'
-			}
-		});
-		const { isCorrect } = await response.json();
+		const data = await fetchFunc('login', { password })
+			.catch(error => {
+				console.error(error);
+				return alert('שגיאה בהתחברות');
+			});
 
-		if (isCorrect) {
+		if (data.isCorrect) {
 			setUserLoggedIn(true);
 		} else {
 			alert('סיסמה שגויה');
