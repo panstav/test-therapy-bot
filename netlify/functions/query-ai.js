@@ -1,10 +1,10 @@
-const queryAi = require("./shared/chat-completion");
+const chatCompletion = require("./shared/chat-completion");
 
 exports.handler = async function (event) {
 
 	const messages = JSON.parse(event.body);
 
-	const aiResponse = await queryAi(messages);
+	const aiResponse = await chatCompletion(messages);
 
 	return {
 		statusCode: 200,
