@@ -20,7 +20,7 @@ function chatCompletion(messages, { delayMs = 0 } = {}) {
 
 	function fetchPrediction() {
 		return openai.chat.completions.create({
-			model: 'gpt-3.5-turbo',
+			model: 'gpt-4-turbo',
 			max_tokens: 300,
 			temperature: 0.5,
 			messages
