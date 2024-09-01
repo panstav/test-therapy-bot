@@ -17,13 +17,13 @@ export default function Chat() {
 		<ChatContainer>
 			<ConversationHeader>
 				<Avatar
-					name="Thera"
+					name="MUUSH"
 					src={getAvatar()}
 					style={{ border: '2px solid #98d3ff' }}
 				/>
 				<ConversationHeader.Content>
 					<div>
-						<div className="has-text-weight-bold">Thera</div>
+						<div className="has-text-weight-bold">MUUSH</div>
 						<div className="is-flex is-align-items-center">
 							<span className="is-inline-block mr-1" style={{ width: '.7em', height: '.7em', backgroundColor: '#00bb00', borderRadius: '100%' }}></span>
 							Online
@@ -31,7 +31,7 @@ export default function Chat() {
 					</div>
 				</ConversationHeader.Content>
 			</ConversationHeader>
-			<MessageList typingIndicator={!isBotTyping ? null : <TypingIndicator className="px-4" content="Thera is typing" />} className="pt-4">
+			<MessageList typingIndicator={!isBotTyping ? null : <TypingIndicator className="px-4" content="MUUSH is typing" />} className="pt-4">
 				{messages.map((message, index) => <Message model={message} key={index} />)}
 			</MessageList>
 			{status && <MessageInput onChange={updateRtl} onSend={reply} attachButton={false} className={inputClassName} style={{ border: 0 }} placeholder="Type message here" />}
