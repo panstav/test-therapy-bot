@@ -16,7 +16,8 @@ export default function useChat() {
 	const countQuestions = () => setQuestionsCount(questionsCount + 1);
 
 	const executeUserMessage = async (message) => {
-		setMessages([...messages, { message, direction: 'outgoing' }]);
+		const messagesInclUserMessage = [...messages, { message, direction: 'outgoing' }];
+		setMessages(messagesInclUserMessage);
 
 		const nextBotMessageKey = await (() => {
 			if (lastMessage.next) return lastMessage.next();
@@ -26,12 +27,12 @@ export default function useChat() {
 		setIsBotTyping(true);
 		setTimeout(() => {
 			setIsBotTyping(false);
-			executeBotMessage(messageTypes[nextBotMessageKey]);
+			executeBotMessage(messageTypes[nextBotMessageKey], messagesInclUserMessage);
 		}, (Math.random() * 1000 + 1000));
 	};
 	const chooseUserMessage = (event) => executeUserMessage(event.currentTarget.innerText);
 
-	const executeBotMessage = async (messageType) => {
+	const executeBotMessage = async (messageType, messages) => {
 
 		if (typeof messageType.message === 'function') messageType.message = (await messageType.message({ messages })).message;
 
@@ -75,7 +76,7 @@ export default function useChat() {
 	};
 
 	useEffect(() => {
-		if (!messages.length) executeBotMessage(messageTypes.initial);
+		if (!messages.length) executeBotMessage(messageTypes.initial, []);
 	}, [!messages.length]);
 
 	return {
