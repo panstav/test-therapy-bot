@@ -31,7 +31,7 @@ export default function Login({ setUserLoggedIn }) {
 
 	return <div className="pt-6 mx-auto" style={{ maxWidth: '300px' }}>
 		<h1 className="title is-3 has-text-black has-text-centered mb-5">התחברות</h1>
-		<input ref={passwordRef} id="password" type="password" placeholder="סיסמה" className="input has-text-black has-background-white has-text-centered" />
+		<input ref={passwordRef} id="password" type="password" placeholder="סיסמה" className="input has-text-black has-background-white has-text-centered is-rtl" />
 		<button onClick={attemptLogin} className="button is-primary mt-3" style={{ width: '100%' }}>התחברות</button>
 	</div>;
 
