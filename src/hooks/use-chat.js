@@ -15,9 +15,14 @@ export default function useChat() {
 	const [questionsCount, setQuestionsCount] = useState(0);
 	const countQuestions = () => setQuestionsCount(questionsCount + 1);
 
+	const [timer, setTimer] = useState();
+
 	const executeUserMessage = async (message) => {
 		const messagesInclUserMessage = [...messages, { message, direction: 'outgoing' }];
 		setMessages(messagesInclUserMessage);
+
+		clearTimeout(timer);
+		setTimer(null);
 
 		const nextBotMessageKey = await (() => {
 			if (lastMessage.next) return lastMessage.next();
@@ -42,7 +47,7 @@ export default function useChat() {
 
 	const messageTypes = {
 		initial: {
-			type: 'choice',
+			type: 'open-question',
 			message: 'שלום, מה שלומך? במה אוכל לעזור?',
 			next: () => 'bestQuestion',
 		},
@@ -70,6 +75,14 @@ export default function useChat() {
 	useEffect(() => {
 		if (!messages.length) executeBotMessage(messageTypes.initial, []);
 	}, [!messages.length]);
+
+	useEffect(() => {
+		if (!status || !messages.length || timer) return;
+		const newTimer = setTimeout(() => {
+			executeBotMessage(messageTypes.end);
+		}, 1000 * 60 * 10);
+		setTimer(newTimer);
+	}, [messages.length, status, timer]);
 
 	return {
 		status: status && lastMessage.type === 'open-question',
