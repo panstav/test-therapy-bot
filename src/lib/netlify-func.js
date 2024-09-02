@@ -1,4 +1,4 @@
-export default async function fetchFunc(endpoint, data) {
+export default async function netlifyFunc(endpoint, data) {
 
 	const fetchObj = {
 		method: data ? 'POST' : 'GET',

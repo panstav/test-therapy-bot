@@ -1,6 +1,6 @@
 import { useRef } from "react";
 
-import fetchFunc from "../lib/fetch-func";
+import fetchFunc from "../lib/netlify-func";
 
 export default function Login({ setUserLoggedIn }) {
 
