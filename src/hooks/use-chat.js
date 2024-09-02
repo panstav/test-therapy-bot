@@ -43,22 +43,14 @@ export default function useChat() {
 	const messageTypes = {
 		initial: {
 			type: 'choice',
-			message: 'שלום, מה שלומך?',
-			options: ['טוב מאוד', 'טוב', 'בסדר', 'לא כל כך טוב', 'לא בסדר', 'גרוע'].map((state) => ({
-				label: state,
-				next: () => 'initial2'
-			}))
-		},
-		initial2: {
-			type: 'open-question',
-			message: 'במה אני יכול לעזור?',
-			next: () => 'bestQuestion'
+			message: 'שלום, מה שלומך? במה אוכל לעזור?',
+			next: () => 'bestQuestion',
 		},
 		bestQuestion: {
 			type: 'open-question',
 			message: ({ messages }) => getBestQuestion(messages),
 			beforeUserReplyCallback: countQuestions,
-			next: () => questionsCount < Math.random() * 10 ? 'bestQuestion' : 'shouldWeContinue'
+			next: () => (questionsCount >= 30 && onceIn(5, 10)) ? 'shouldWeContinue' : 'bestQuestion'
 		},
 		shouldWeContinue: {
 			type: 'choice',
@@ -95,6 +87,10 @@ export default function useChat() {
 		}))
 	};
 
+}
+
+function onceIn(min, max) {
+	return Math.random() < 1 / (min + Math.random() * (max - min));
 }
 
 function getBestQuestion(messages) {
