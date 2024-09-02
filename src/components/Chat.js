@@ -3,11 +3,40 @@ import { MainContainer, ChatContainer, MessageList, Message, MessageInput, Conve
 
 import useChat from "../hooks/use-chat";
 
+function SymbolReactElementToString(reactElement) {
+	// return text content regardless of how deeply nested the text is
+	if (typeof reactElement === 'string') return reactElement;
+	if (Array.isArray(reactElement)) return reactElement.map(SymbolReactElementToString).join('');
+	if (typeof reactElement === 'object' && reactElement.props) return SymbolReactElementToString(reactElement.props.children);
+	return '';
+}
+
+function useCopyChat(messages) {
+
+	const copyButtonBaseClassName = "button is-light is-small";
+	const [copyButtonClassName, setCopyButtonClassName] = useState(`${copyButtonBaseClassName} is-info`);
+	const [copyButtonLabel, setCopyButtonLabel] = useState('Copy chat');
+	const copyChat = () => {
+		const text = messages.map(({ payload, direction }) => `${direction === 'incoming' ? 'Bot: ' : 'User: '}${SymbolReactElementToString(payload)}`).join('\n\n');
+		navigator.clipboard.writeText(text);
+		setCopyButtonLabel('Copied!');
+		setCopyButtonClassName(`${copyButtonBaseClassName} is-success`);
+		setTimeout(() => {
+			setCopyButtonLabel('Copy chat');
+			setCopyButtonClassName(`${copyButtonBaseClassName} is-info`);
+		}, 2000);
+	}
+
+	return { copyChat, copyButtonLabel, copyButtonClassName };
+}
+
 export default function Chat() {
 
 	const [inputClassName, setInputClassName] = useState('');
 
 	const { status, messages, reply, isBotTyping } = useChat();
+
+	const { copyChat, copyButtonLabel, copyButtonClassName } = useCopyChat(messages);
 
 	const updateRtl = (text) => {
 		setInputClassName(isRtl(text) ? 'has-rtl' : '');
@@ -22,11 +51,16 @@ export default function Chat() {
 					style={{ border: '2px solid #98d3ff' }}
 				/>
 				<ConversationHeader.Content>
-					<div>
-						<div className="has-text-weight-bold">MUUSH</div>
+					<div className="is-flex is-justify-content-space-between">
+						<div>
+							<div className="has-text-weight-bold">MUUSH</div>
+							<div className="is-flex is-align-items-center">
+								<span className="is-inline-block mr-1" style={{ width: '.7em', height: '.7em', backgroundColor: '#00bb00', borderRadius: '100%' }}></span>
+								Online
+							</div>
+						</div>
 						<div className="is-flex is-align-items-center">
-							<span className="is-inline-block mr-1" style={{ width: '.7em', height: '.7em', backgroundColor: '#00bb00', borderRadius: '100%' }}></span>
-							Online
+							<button className={copyButtonClassName} onClick={copyChat}>{copyButtonLabel}</button>
 						</div>
 					</div>
 				</ConversationHeader.Content>
