@@ -15,6 +15,7 @@
     "@babel/plugin-transform-react-jsx": "^7.25.2",
     "@chatscope/chat-ui-kit-react": "^2.0.3",
     "@chatscope/chat-ui-kit-styles": "^1.4.0",
+    "@sentry/react": "^8.27.0",
     "babel-plugin-module-resolver": "^5.0.2",
     "bulma": "^1.0.2",
     "netlify-cli": "^17.34.2",
