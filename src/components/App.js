@@ -10,8 +10,6 @@ export default function App () {
 	const [userLoggedIn, setUserLoggedIn] = useState(isDevelopment);
 
 	return <div style={{ position: "relative", height: "100%", maxWidth: '600px', margin: 'auto' }}>
-		<button onClick={() => methodDoesNotExist()}>Break the world</button>;
-
 		{userLoggedIn ? <Chat /> : <Login setUserLoggedIn={setUserLoggedIn} />}
 	</div>;
 }
