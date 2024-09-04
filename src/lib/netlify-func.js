@@ -11,16 +11,24 @@ export default async function netlifyFunc(endpoint, data) {
 		};
 	}
 
-	return new Promise(async (resolve, reject) => {
+	return attemptFetching();
+
+	async function attemptFetching() {
+		let response, responseJson;
+
 		try {
-			const response = await fetch(`/.netlify/functions/${endpoint}`, fetchObj);
-			const data = response.json();
-			resolve(data);
+			response = await fetch(`/.netlify/functions/${endpoint}`, fetchObj);
+			responseJson = await response.json();
+			return responseJson;
 
 		} catch (error) {
-			console.error(error);
-			reject(error);
+			if (error?.message.includes('TimeoutErr')) {
+				return attemptFetching();
+			}
+
+			debugger;
+			throw error;
 		}
-	});
+	}
 
 }
