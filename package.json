@@ -1,6 +1,6 @@
 {
   "name": "test-therapy-bot",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "scripts": {
     "start": "parcel src/index.html",
