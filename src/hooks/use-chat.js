@@ -53,7 +53,7 @@ export default function useChat() {
 		},
 		bestQuestion: {
 			type: 'open-question',
-			message: ({ messages }) => getBestQuestion(messages),
+			message: ({ messages }) => getBestQuestion({ messages, readyForDoubt: questionsCount >= 20 }),
 			beforeUserReplyCallback: countQuestions,
 			next: () => (questionsCount >= 30 && onceIn(5, 10)) ? 'shouldWeContinue' : 'bestQuestion'
 		},
@@ -106,8 +106,9 @@ function onceIn(min, max) {
 	return Math.random() < 1 / (min + Math.random() * (max - min));
 }
 
-function getBestQuestion(messages) {
+function getBestQuestion({ readyForDoubt, messages }) {
 	return netlifyFunc('ai-best-question', {
+		readyForDoubt,
 		messages: prepMessagesForAi(messages)
 	});
 }
