@@ -3,6 +3,8 @@ import { Message } from "@chatscope/chat-ui-kit-react";
 
 import netlifyFunc from "../lib/netlify-func";
 
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 export default function useChat() {
 
 	const [status, setStatus] = useState(true);
@@ -34,16 +36,16 @@ export default function useChat() {
 		setIsBotTyping(true);
 		setTimeout(() => {
 			setIsBotTyping(false);
-			executeBotMessage(messageTypes[nextBotMessageKey], messagesInclUserMessage);
+			executeBotMessage(messageTypes[nextBotMessageKey], nextBotMessageKey, messagesInclUserMessage);
 		}, (Math.random() * 1000 + 1000));
 	};
 	const chooseUserMessage = (event) => executeUserMessage(event.currentTarget.innerText);
 
-	const executeBotMessage = async (messageType, messages) => {
+	const executeBotMessage = async (messageType, messageTypeName, messages) => {
 
 		if (typeof messageType.message === 'function') messageType.message = (await messageType.message({ messages })).message;
 
-		setMessages((messages) => [...messages, { direction: 'incoming', ...messageType }]);
+		setMessages((messages) => [...messages, { direction: 'incoming', ...messageType, name: messageTypeName }]);
 		if (messageType.beforeUserReplyCallback) await (messageType.beforeUserReplyCallback || Promise.resolve)();
 	};
 
@@ -81,13 +83,13 @@ export default function useChat() {
 	};
 
 	useEffect(() => {
-		if (!messages.length) executeBotMessage(messageTypes.initial, []);
+		if (!messages.length) executeBotMessage(messageTypes.initial, 'initial', []);
 	}, [!messages.length]);
 
 	useEffect(() => {
 		if (!status || !messages.length || timer || isDevelopment) return;
 		const newTimer = setTimeout(() => {
-			executeBotMessage(messageTypes.end);
+			executeBotMessage(messageTypes.end, 'end');
 		}, 1000 * 60 * 10);
 		setTimer(newTimer);
 	}, [messages.length, status, timer]);
@@ -100,6 +102,7 @@ export default function useChat() {
 			direction: message.direction,
 			type: 'custom',
 			payload: <Message.CustomContent>
+				{(isDevelopment && message.direction === 'incoming') && <pre className="has-text-weight-bold is-inline-block mb-1 p-1" style={{ backgroundColor: 'transparent' }}>{message.name}</pre>}
 				<div className={isRtl(message?.message) ? 'is-rtl' : ''}>{message.message}</div>
 				{message.type === 'choice' && index === arr.length - 1 && <div className="boxes mt-3">
 					{message.options.map((option) => <div key={option.label} className="box is-clickable py-2 has-text-centered" onClick={chooseUserMessage}>{option.label}</div>)}
