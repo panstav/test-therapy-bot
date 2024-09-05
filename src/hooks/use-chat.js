@@ -21,6 +21,19 @@ export default function useChat() {
 
 	const [timer, setTimer] = useState();
 
+	const setupTimeout = (lastMessageName) => {
+		const newTimer = setTimeout(() => {
+			if (lastMessageName === 'shouldWeContinue') return executeBotMessage(messageTypes.end, 'end');
+			executeBotMessage(messageTypes.shouldWeContinue, 'shouldWeContinue');
+		}, 1000 * 60 * 10);
+		setTimer(newTimer);
+	};
+
+	const onUserTyping = () => {
+		clearTimeout(timer);
+		setupTimeout();
+	};
+
 	const executeUserMessage = async (message) => {
 		const messagesInclUserMessage = [...messages, { message, direction: 'outgoing' }];
 		setMessages(messagesInclUserMessage);
@@ -70,6 +83,7 @@ export default function useChat() {
 		shouldWeContinue: {
 			type: 'choice',
 			message: 'שניקח הפסקה?',
+			beforeUserReplyCallback: () => setupTimeout('shouldWeContinue'),
 			options: ['כן', 'לא'].map((state) => ({
 				label: state,
 				next: () => state === 'כן' ? 'end' : 'bestQuestion'
@@ -88,13 +102,11 @@ export default function useChat() {
 
 	useEffect(() => {
 		if (!status || !messages.length || timer || isDevelopment) return;
-		const newTimer = setTimeout(() => {
-			executeBotMessage(messageTypes.end, 'end');
-		}, 1000 * 60 * 10);
-		setTimer(newTimer);
-	}, [messages.length, status, timer]);
+		setupTimeout();
+	}, [messages.length, lastMessage.name, status, timer]);
 
 	return {
+		onUserTyping,
 		status: status && lastMessage.type === 'open-question',
 		isBotTyping,
 		reply: executeUserMessage,
