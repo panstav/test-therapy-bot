@@ -3,6 +3,9 @@ import { MainContainer, ChatContainer, MessageList, Message, MessageInput, Conve
 
 import useChat from "../hooks/use-chat";
 
+// get version from package.json
+const version = process.env.npm_package_version;
+
 export default function Chat() {
 
 	const [inputClassName, setInputClassName] = useState('');
@@ -33,8 +36,7 @@ export default function Chat() {
 						<div>
 							<div className="has-text-weight-bold">MUUSH</div>
 							<div className="is-flex is-align-items-center">
-								<span className="is-inline-block mr-1" style={{ width: '.7em', height: '.7em', backgroundColor: '#00bb00', borderRadius: '100%' }}></span>
-								Online
+								v{version}
 							</div>
 						</div>
 						<div className="is-flex is-align-items-center">
