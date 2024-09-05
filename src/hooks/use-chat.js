@@ -77,7 +77,7 @@ export default function useChat() {
 	}, [!messages.length]);
 
 	useEffect(() => {
-		if (!status || !messages.length || timer) return;
+		if (!status || !messages.length || timer || isDevelopment) return;
 		const newTimer = setTimeout(() => {
 			executeBotMessage(messageTypes.end);
 		}, 1000 * 60 * 10);
