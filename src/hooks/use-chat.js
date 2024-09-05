@@ -12,6 +12,8 @@ export default function useChat() {
 
 	const [isBotTyping, setIsBotTyping] = useState(false);
 
+	const [discoveryCounter, setDiscoveryCounter] = useState(0);
+	const countDiscovery = () => setDiscoveryCounter(discoveryCounter + 1);
 	const [questionsCount, setQuestionsCount] = useState(0);
 	const countQuestions = () => setQuestionsCount(questionsCount + 1);
 
@@ -49,7 +51,13 @@ export default function useChat() {
 		initial: {
 			type: 'open-question',
 			message: 'שלום, מה שלומך? במה אוכל לעזור?',
-			next: () => 'bestQuestion',
+			next: () => 'discovery'
+		},
+		discovery: {
+			type: 'open-question',
+			message: ({ messages }) => getDiscoveryQuestion({ messages }),
+			beforeUserReplyCallback: countDiscovery,
+			next: () => discoveryCounter >= 10 ? 'bestQuestion' : 'discovery'
 		},
 		bestQuestion: {
 			type: 'open-question',
@@ -106,7 +114,13 @@ function onceIn(min, max) {
 	return Math.random() < 1 / (min + Math.random() * (max - min));
 }
 
-function getBestQuestion({ readyForDoubt, messages }) {
+function getDiscoveryQuestion({ messages }) {
+	return netlifyFunc('ai-discovery', {
+		messages: prepMessagesForAi(messages)
+	});
+}
+
+function getBestQuestion({ messages, readyForDoubt }) {
 	return netlifyFunc('ai-best-question', {
 		readyForDoubt,
 		messages: prepMessagesForAi(messages)
