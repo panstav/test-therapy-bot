@@ -48,7 +48,6 @@ export default function useChat() {
 
 		setIsBotTyping(true);
 		setTimeout(() => {
-			setIsBotTyping(false);
 			executeBotMessage(messageTypes[nextBotMessageKey], nextBotMessageKey, messagesInclUserMessage);
 		}, (Math.random() * 1000 + 1000));
 	};
@@ -58,6 +57,7 @@ export default function useChat() {
 
 		if (typeof messageType.message === 'function') messageType.message = (await messageType.message({ messages })).message;
 
+		setIsBotTyping(false);
 		setMessages((messages) => [...messages, { direction: 'incoming', ...messageType, name: messageTypeName }]);
 		if (messageType.beforeUserReplyCallback) await (messageType.beforeUserReplyCallback || Promise.resolve)();
 	};
