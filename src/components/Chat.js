@@ -49,7 +49,7 @@ export default function Chat() {
 			<MessageList typingIndicator={!isBotTyping ? null : <TypingIndicator className="px-4" content="MUUSH is typing" />} className="pt-4">
 				{messages.map((message, index) => <Message model={message} key={index} />)}
 			</MessageList>
-			{status && <MessageInput onChange={onMessageInputChange} onSend={onSend} attachButton={false} className={inputClassName} style={{ border: 0, opacity: userInputType === 'open-question' ? 1 : 0 }} placeholder="Type message here" />}
+			{(status && userInputType === 'open-question') && <MessageInput onChange={onMessageInputChange} onSend={onSend} attachButton={false} className={inputClassName} style={{ border: 0 }} placeholder="Type message here" />}
 		</ChatContainer>
 	</MainContainer>
 
