@@ -11,7 +11,7 @@ export default function Chat() {
 	const [inputClassName, setInputClassName] = useState('');
 
 	const { status, messages, reply, isBotTyping, onUserTyping, userInputType } = useChat();
-	const onSend = (message) => reply(message.trim());
+	const onSend = (message) => reply(message.replaceAll('&nbsp;', '').trim());
 
 	const { copyChat, copyButtonLabel, copyButtonClassName } = useCopyChat(messages);
 
