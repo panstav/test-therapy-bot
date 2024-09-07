@@ -111,6 +111,7 @@ export default function useChat() {
 		isBotTyping,
 		reply: executeUserMessage,
 		messages: messages.map((message, index, arr) => ({
+			name: message.name,
 			direction: message.direction,
 			type: 'custom',
 			payload: <Message.CustomContent>
