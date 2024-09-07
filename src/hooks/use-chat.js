@@ -122,7 +122,8 @@ export default function useChat() {
 
 	return {
 		onUserTyping,
-		status: status && lastMessage.type === 'open-question',
+		status,
+		userInputType: lastMessage.type,
 		isBotTyping,
 		reply: executeUserMessage,
 		messages: messages.map((message, index, arr) => ({
