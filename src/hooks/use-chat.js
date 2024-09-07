@@ -42,8 +42,19 @@ export default function useChat() {
 		setTimer(null);
 
 		const nextBotMessageKey = await (() => {
-			if (lastMessage.next) return lastMessage.next();
-			return lastMessage.options.find((option) => option.label === message).next();
+			let key;
+			if (lastMessage.next) key = lastMessage.next();
+			else key = lastMessage.options.find((option) => option.label === message).next();
+
+			if (key !== 'discretion') return key;
+
+			return netlifyFunc('ai-discretion', {
+				qna: messages.slice(-2).reduce((accu, message) => {
+					if (message.direction === 'incoming') accu += `Q: ${message.message}\n`;
+					else accu += `A: ${message.message}\n`;
+					return accu;
+				}, '')
+			}).then(({ message }) => ['discovery', 'bestQuestion', 'bestQuestionWithDoubt'].includes(message) ? message : 'discovery');
 		})();
 
 		setIsBotTyping(true);
@@ -72,13 +83,17 @@ export default function useChat() {
 			type: 'open-question',
 			message: ({ messages }) => getDiscoveryQuestion({ messages }),
 			beforeUserReplyCallback: countDiscovery,
-			next: () => discoveryCounter >= 10 ? 'bestQuestion' : 'discovery'
+			next: () => discoveryCounter >= 2 ? 'discretion' : 'discovery'
 		},
 		bestQuestion: {
 			type: 'open-question',
-			message: ({ messages }) => getBestQuestion({ messages, readyForDoubt: questionsCount >= 20 }),
-			beforeUserReplyCallback: countQuestions,
-			next: () => (questionsCount >= 30 && onceIn(5, 10)) ? 'shouldWeContinue' : 'bestQuestion'
+			message: ({ messages }) => getBestQuestion({ messages }),
+			next: () => 'discretion'
+		},
+		bestQuestionWithDoubt: {
+			type: 'open-question',
+			message: ({ messages }) => getBestQuestion({ messages, readyForDoubt: true }),
+			next: () => 'discovery'
 		},
 		shouldWeContinue: {
 			type: 'choice',
@@ -86,7 +101,7 @@ export default function useChat() {
 			beforeUserReplyCallback: () => setupTimeout('shouldWeContinue'),
 			options: ['כן', 'לא'].map((state) => ({
 				label: state,
-				next: () => state === 'כן' ? 'end' : 'bestQuestion'
+				next: () => state === 'כן' ? 'end' : 'discretion'
 			})),
 		},
 		end: {

@@ -6,20 +6,19 @@ const openai = new OpenAI({
 	project: process.env.OPENAI_PROJECT,
 });
 
-module.exports = async function completeChat(messages, { delayMs = 0 } = {}) {
+module.exports = async function completeChat(messages, { model = 'gpt-4o', delayMs = 0 } = {}) {
 
-	debugger;
 	return new Promise(resolve => setTimeout(resolve, delayMs)).then(() => fetchChatCompletion().catch(err => {
 		debugger;
 
-		if ([502, 429].includes(err.status)) return completeChat(messages, { delayMs: (delayMs || 2000) * 2 });
+		if ([502, 429].includes(err.status)) return completeChat(messages, { model, delayMs: (delayMs || 2000) * 2 });
 		console.error(err);
 		debugger;
 	}));
 
 	function fetchChatCompletion() {
 		return openai.chat.completions.create({
-			model: 'gpt-4o',
+			model,
 			max_tokens: 1000,
 			temperature: 0.5,
 			messages
