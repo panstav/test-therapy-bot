@@ -11,6 +11,7 @@ export default function Chat() {
 	const [inputClassName, setInputClassName] = useState('');
 
 	const { status, messages, reply, isBotTyping, onUserTyping } = useChat();
+	const onSend = (message) => reply(message.trim());
 
 	const { copyChat, copyButtonLabel, copyButtonClassName } = useCopyChat(messages);
 
@@ -48,7 +49,7 @@ export default function Chat() {
 			<MessageList typingIndicator={!isBotTyping ? null : <TypingIndicator className="px-4" content="MUUSH is typing" />} className="pt-4">
 				{messages.map((message, index) => <Message model={message} key={index} />)}
 			</MessageList>
-			{status && <MessageInput autoFocus onChange={onMessageInputChange} onSend={reply} attachButton={false} className={inputClassName} style={{ border: 0 }} placeholder="Type message here" />}
+			{status && <MessageInput autoFocus onChange={onMessageInputChange} onSend={onSend} attachButton={false} className={inputClassName} style={{ border: 0 }} placeholder="Type message here" />}
 		</ChatContainer>
 	</MainContainer>
 
