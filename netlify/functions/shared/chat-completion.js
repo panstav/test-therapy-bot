@@ -6,7 +6,8 @@ const openai = new OpenAI({
 	project: process.env.OPENAI_PROJECT,
 });
 
-module.exports = async function completeChat(messages, { model = 'gpt-4o', delayMs = 0 } = {}) {
+module.exports = async function completeChat(messages, { json, model = 'gpt-4o', delayMs = 0 } = {}) {
+	if (json) model = 'gpt-4o-2024-08-06';
 
 	return new Promise(resolve => setTimeout(resolve, delayMs)).then(() => fetchChatCompletion().catch(err => {
 		debugger;
@@ -17,12 +18,20 @@ module.exports = async function completeChat(messages, { model = 'gpt-4o', delay
 	}));
 
 	function fetchChatCompletion() {
-		return openai.chat.completions.create({
+
+		const chatObj = {
 			model,
 			max_tokens: 1000,
 			temperature: 0.5,
 			messages
-		});
+		};
+
+		if (json) chatObj.response_format = {
+			type: "json_schema",
+			json_schema: json
+		};
+
+		return openai.chat.completions.create(chatObj);
 	}
 
 };

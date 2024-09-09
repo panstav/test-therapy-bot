@@ -24,6 +24,7 @@
     "@sentry/react": "^8.27.0",
     "babel-plugin-module-resolver": "^5.0.2",
     "bulma": "^1.0.2",
+    "classnames": "^2.5.1",
     "netlify-cli": "^17.34.2",
     "openai": "^4.56.0",
     "parcel": "^2.12.0",
