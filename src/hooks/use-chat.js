@@ -53,6 +53,7 @@ export default function useChat() {
 						return accu;
 					}, '') }
 				).then(({ message }) => parseFloat(message) || 0);
+				// console.log('Detected distressLevel', distressLevel);
 				if (distressLevel > 7.5) return 'rateDistress';
 			}
 
