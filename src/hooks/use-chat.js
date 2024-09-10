@@ -18,8 +18,6 @@ export default function useChat() {
 
 	const [discoveryCounter, setDiscoveryCounter] = useState(0);
 	const countDiscovery = () => setDiscoveryCounter(discoveryCounter + 1);
-	const [questionsCount, setQuestionsCount] = useState(0);
-	const countQuestions = () => setQuestionsCount(questionsCount + 1);
 
 	const [timer, setTimer] = useState();
 
