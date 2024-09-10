@@ -54,7 +54,7 @@ export default function useChat() {
 					}, '') }
 				).then(({ message }) => parseFloat(message) || 0);
 				// console.log('Detected distressLevel', distressLevel);
-				if (distressLevel >= 7) return 'rateDistress';
+				if (distressLevel >= 6) return 'rateDistress';
 			}
 
 			if (lastMessage.next) key = lastMessage.next();
