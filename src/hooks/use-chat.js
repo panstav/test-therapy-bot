@@ -58,7 +58,7 @@ export default function useChat() {
 				if (distressLevel >= 6) return 'rateDistress';
 			}
 
-			if (!disclosedEnquiryWillingness) {
+			if (!disclosedEnquiryWillingness && messages.length > 3) {
 				const enquiryOpportunity = await netlifyFunc('ai-detect-enquiry',
 					{ qna: messagesInclUserMessage.slice(-2).reduce((accu, message) => {
 						if (message.direction === 'incoming') accu += `Q: ${message.message}\n`;
