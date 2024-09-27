@@ -66,7 +66,7 @@ export default function useChat() {
 						return accu;
 					}, '') }
 				).then(({ message }) => parseFloat(message) || 0);
-				console.log('Detected enquiryOpportunity', enquiryOpportunity);
+				// console.log('Detected enquiryOpportunity', enquiryOpportunity);
 				if (enquiryOpportunity >= 7) {
 					setEnquiryWillingness(true);
 					return 'suggestEnquiry';
