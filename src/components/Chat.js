@@ -61,7 +61,7 @@ function useCopyChat(messages) {
 	const [copyButtonClassName, setCopyButtonClassName] = useState(`${copyButtonBaseClassName} is-info`);
 	const [copyButtonLabel, setCopyButtonLabel] = useState('Copy chat');
 	const copyChat = () => {
-		const text = messages.map(({ payload, direction, name }) => `${direction === 'incoming' ? `[${name}]\nBot: ` : 'User: '}${SymbolReactElementToString(payload)}`).join('\n\n');
+		const text = `${window.totalCost}\n\n${messages.map(({ payload, direction, name }) => `${direction === 'incoming' ? `[${name}]\nBot: ` : 'User: '}${SymbolReactElementToString(payload)}`).join('\n\n') }`;
 		navigator.clipboard.writeText(text);
 		setCopyButtonLabel('Copied!');
 		setCopyButtonClassName(`${copyButtonBaseClassName} is-success`);

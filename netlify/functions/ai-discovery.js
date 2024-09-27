@@ -11,7 +11,10 @@ exports.handler = async function (event) {
 
 	return {
 		statusCode: 200,
-		body: JSON.stringify({ message: aiResponse.choices[0].message.content })
+		body: JSON.stringify({
+			message: aiResponse.choices[0].message.content,
+			cost: aiResponse.cost
+		})
 	};
 };
 

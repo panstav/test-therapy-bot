@@ -1,4 +1,5 @@
 const OpenAI = require("openai");
+const Decimal = require('decimal.js');
 
 const openai = new OpenAI({
 	apiKey: process.env.OPENAI_API_KEY,
@@ -6,7 +7,22 @@ const openai = new OpenAI({
 	project: process.env.OPENAI_PROJECT,
 });
 
-module.exports = async function completeChat(messages, { json, model = 'gpt-4o', delayMs = 0 } = {}) {
+const modelCosts = {
+	'gpt-4o-2024-08-06': {
+		input: 0.0000025,
+		output: 0.00001
+	},
+	'gpt-3.5-turbo': {
+		input: 0.000003,
+		output: 0.000006
+	},
+	'gpt-3.5-turbo-0125': {
+		input: 0.0000005,
+		output: 0.0000015
+	},
+};
+
+module.exports = async function completeChat(messages, { json, model = 'gpt-4o-2024-08-06', delayMs = 0 } = {}) {
 	if (json) model = 'gpt-4o-2024-08-06';
 
 	return new Promise(resolve => setTimeout(resolve, delayMs)).then(() => fetchChatCompletion().catch(err => {
@@ -17,7 +33,7 @@ module.exports = async function completeChat(messages, { json, model = 'gpt-4o',
 		debugger;
 	}));
 
-	function fetchChatCompletion() {
+	async function fetchChatCompletion() {
 
 		const chatObj = {
 			model,
@@ -31,7 +47,14 @@ module.exports = async function completeChat(messages, { json, model = 'gpt-4o',
 			json_schema: json
 		};
 
-		return openai.chat.completions.create(chatObj);
+		const res = await openai.chat.completions.create(chatObj);
+
+		const modelCost = modelCosts[res.model] || modelCosts['gpt-4o-2024-08-06'];
+		res.cost = new Decimal(res.usage.completion_tokens).times(modelCost.output)
+			.plus(new Decimal(res.usage.prompt_tokens).times(modelCost.input))
+			.toNumber();
+
+		return res;
 	}
 
 };

@@ -25,6 +25,7 @@
     "babel-plugin-module-resolver": "^5.0.2",
     "bulma": "^1.0.2",
     "classnames": "^2.5.1",
+    "decimal.js": "^10.4.3",
     "netlify-cli": "^17.34.2",
     "openai": "^4.56.0",
     "parcel": "^2.12.0",
