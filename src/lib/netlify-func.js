@@ -15,7 +15,9 @@ export default async function netlifyFunc(endpoint, data) {
 
 	const res = await attemptFetching();
 
-	window.totalCost = new Decimal(window.totalCost || 0).plus(res.cost).toNumber();
+	if (res.cost) {
+		window.totalCost = new Decimal(window.totalCost || 0).plus(res.cost).toNumber();
+	}
 
 	return res;
 
