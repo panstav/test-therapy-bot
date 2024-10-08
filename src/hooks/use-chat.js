@@ -14,6 +14,9 @@ export default function useChat() {
 	const lastMessage = messages[messages.length - 1] || {};
 
 	const [isBotTyping, setIsBotTyping] = useState(false);
+
+	const [explainedLengthiness, setExplainedLengthiness] = useState(false);
+
 	const [disclosedDistressLevel, setDistressLevel] = useState(null);
 	const [disclosedEnquiryWillingness, setEnquiryWillingness] = useState(null);
 
@@ -56,6 +59,21 @@ export default function useChat() {
 				).then(({ message }) => parseFloat(message) || 0);
 				// console.log('Detected distressLevel', distressLevel);
 				if (distressLevel >= 6) return 'rateDistress';
+			}
+
+			if (messages.length > 2 && (!explainedLengthiness || messages.length - explainedLengthiness >= 4)) {
+				const briefness = await netlifyFunc('ai-detect-briefness',
+					{ qna: messagesInclUserMessage.slice(-2).reduce((accu, message) => {
+						if (message.direction === 'incoming') accu += `Q: ${message.message}\n`;
+						else accu += `A: ${message.message}\n`;
+						return accu;
+					}, '') }
+				).then(({ message }) => parseFloat(message) || 0);
+				console.log('Detected briefness', briefness);
+				if (briefness >= 7) {
+					setExplainedLengthiness(messages.length);
+					return 'explainLengthiness';
+				}
 			}
 
 			if (!disclosedEnquiryWillingness && messages.length > 3) {
@@ -111,19 +129,24 @@ export default function useChat() {
 		},
 		discovery: {
 			type: 'open-question',
-			message: ({ messages }) => getDiscoveryQuestion({ messages }),
+			message: getDiscoveryQuestion,
 			beforeUserReplyCallback: countDiscovery,
 			next: () => discoveryCounter >= 2 ? 'discretion' : 'discovery'
 		},
 		bestQuestion: {
 			type: 'open-question',
-			message: ({ messages }) => getBestQuestion({ messages }),
+			message: getBestQuestion,
 			next: () => 'discretion'
 		},
 		bestQuestionWithDoubt: {
 			type: 'open-question',
 			message: ({ messages }) => getBestQuestion({ messages, readyForDoubt: true }),
 			next: () => 'discovery'
+		},
+		explainLengthiness: {
+			type: 'open-question',
+			message: explainLengthiness,
+			next: () => 'discretion'
 		},
 		rateDistress: {
 			type: 'choice',
@@ -223,6 +246,12 @@ export default function useChat() {
 
 function onceIn(min, max) {
 	return Math.random() < 1 / (min + Math.random() * (max - min));
+}
+
+function explainLengthiness({ messages }) {
+	return netlifyFunc('ai-explain-lengthiness', {
+		messages: prepMessagesForAi(messages.slice(-2))
+	});
 }
 
 function getDiscoveryQuestion({ messages }) {
