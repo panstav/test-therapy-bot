@@ -38,7 +38,7 @@ export default function useChat() {
 		setupTimeout();
 	};
 
-	const executeUserMessage = async (message) => {
+	const executeUserMessage = async (message, tempData) => {
 		const messagesInclUserMessage = [...messages, { message, direction: 'outgoing' }];
 		setMessages(messagesInclUserMessage);
 
@@ -49,7 +49,7 @@ export default function useChat() {
 			let key;
 
 			// detect distress levels
-			if (!disclosedDistressLevel) {
+			if (!disclosedDistressLevel && !tempData?.distressLevel) {
 				const distressLevel = await netlifyFunc('ai-detect-distress',
 					{ qna: messagesInclUserMessage.slice(-2).reduce((accu, message) => {
 						if (message.direction === 'incoming') accu += `Q: ${message.message}\n`;
@@ -61,7 +61,7 @@ export default function useChat() {
 				if (distressLevel >= 6) return 'rateDistress';
 			}
 
-			if (messages.length > 2 && (!explainedLengthiness || messages.length - explainedLengthiness >= 4)) {
+			if (messages.length > 2 && (!explainedLengthiness || messages.length - explainedLengthiness >= 4) && !tempData?.distressLevel) {
 				const briefness = await netlifyFunc('ai-detect-briefness',
 					{ qna: messagesInclUserMessage.slice(-2).reduce((accu, message) => {
 						if (message.direction === 'incoming') accu += `Q: ${message.message}\n`;
@@ -76,7 +76,7 @@ export default function useChat() {
 				}
 			}
 
-			if (!disclosedEnquiryWillingness && messages.length > 3) {
+			if (!disclosedEnquiryWillingness && messages.length > 3 && !tempData?.distressLevel) {
 				const enquiryOpportunity = await netlifyFunc('ai-detect-enquiry',
 					{ qna: messagesInclUserMessage.slice(-2).reduce((accu, message) => {
 						if (message.direction === 'incoming') accu += `Q: ${message.message}\n`;
@@ -110,7 +110,7 @@ export default function useChat() {
 			executeBotMessage(messageTypes[nextBotMessageKey], nextBotMessageKey, messagesInclUserMessage);
 		}, (Math.random() * 1000 + 1000));
 	};
-	const chooseUserMessage = (event) => executeUserMessage(event.currentTarget.innerText);
+	const chooseUserMessage = (event, tempData) => executeUserMessage(event.currentTarget.innerText, tempData);
 
 	const executeBotMessage = async (messageType, messageTypeName, messages) => {
 
@@ -154,7 +154,11 @@ export default function useChat() {
 			options: Array.from({ length: 7 }, (_, index) => ({
 				label: index + 1 === 1 ? '1 (נמוך)' : index + 1 === 7 ? '7 (גבוה מאוד)' : String(index + 1),
 				next: index + 1 >= 6 ? () => 'distress' : () => 'discretion',
-				onClick: (event) => setDistressLevel(parseInt(event.currentTarget.innerText))
+				onClick: (event) => {
+					const distressLevel = parseInt(event.currentTarget.innerText);
+					setDistressLevel(distressLevel);
+					return { distressLevel };
+				}
 			}))
 		},
 		distress: {
@@ -218,7 +222,7 @@ export default function useChat() {
 				{(isDevelopment && message.direction === 'incoming') && <pre className="has-text-weight-bold is-inline-block mb-1 p-1" style={{ backgroundColor: 'transparent' }}>{message.name}</pre>}
 				<div className={isRtl(message?.message) ? 'is-rtl' : ''}>{message.message}</div>
 				{message.type === 'choice' && index === arr.length - 1 && <div className="boxes mt-3">
-					{message.options.map(({ label, href, onClick }) => {
+					{message.options.map(({ label, href, onClick = () => {} }) => {
 						const OuterWrapper = href ? 'div' : Fragment;
 						const ItemWrapper = href ? 'a' : 'div';
 						const wrapperProps = href ? { className: "box is-clickable" } : {};
@@ -229,8 +233,8 @@ export default function useChat() {
 							itemProps.rel = 'noopener noreferrer';
 						}
 						itemProps.onClick = (event) => {
-							if (onClick) onClick(event);
-							chooseUserMessage(event);
+							const tempData = onClick(event);
+							chooseUserMessage(event, tempData);
 						};
 						const itemClassName = classNames('py-2 has-text-centered', href || 'box is-clickable');
 						return <OuterWrapper key={label} {...wrapperProps}>
