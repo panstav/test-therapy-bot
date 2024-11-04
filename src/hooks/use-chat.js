@@ -48,46 +48,48 @@ export default function useChat() {
 		const nextBotMessageKey = await (async () => {
 			let key;
 
-			// detect distress levels
-			if (!disclosedDistressLevel && !tempData?.distressLevel) {
-				const distressLevel = await netlifyFunc('ai-detect-distress',
+			if (!lastMessage?.options) {
+				// detect distress levels
+				if (!disclosedDistressLevel && !tempData?.distressLevel) {
+					const distressLevel = await netlifyFunc('ai-detect-distress',
 					{ qna: messagesInclUserMessage.slice(-2).reduce((accu, message) => {
-						if (message.direction === 'incoming') accu += `Q: ${message.message}\n`;
-						else accu += `A: ${message.message}\n`;
-						return accu;
+								if (message.direction === 'incoming') accu += `Q: ${message.message}\n`;
+								else accu += `A: ${message.message}\n`;
+								return accu;
 					}, '') }
-				).then(({ message }) => parseFloat(message) || 0);
-				// console.log('Detected distressLevel', distressLevel);
-				if (distressLevel >= 6) return 'rateDistress';
-			}
-
-			if (messages.length > 2 && (!explainedLengthiness || messages.length - explainedLengthiness >= 4) && !tempData?.distressLevel) {
-				const briefness = await netlifyFunc('ai-detect-briefness',
-					{ qna: messagesInclUserMessage.slice(-2).reduce((accu, message) => {
-						if (message.direction === 'incoming') accu += `Q: ${message.message}\n`;
-						else accu += `A: ${message.message}\n`;
-						return accu;
-					}, '') }
-				).then(({ message }) => parseFloat(message) || 0);
-				console.log('Detected briefness', briefness);
-				if (briefness >= 7) {
-					setExplainedLengthiness(messages.length);
-					return 'explainLengthiness';
+					).then(({ message }) => parseFloat(message) || 0);
+					// console.log('Detected distressLevel', distressLevel);
+					if (distressLevel >= 6) return 'rateDistress';
 				}
-			}
 
-			if (!disclosedEnquiryWillingness && messages.length > 3 && !tempData?.distressLevel) {
-				const enquiryOpportunity = await netlifyFunc('ai-detect-enquiry',
+				if (messages.length > 2 && (!explainedLengthiness || messages.length - explainedLengthiness >= 4) && !tempData?.distressLevel) {
+					const briefness = await netlifyFunc('ai-detect-briefness',
 					{ qna: messagesInclUserMessage.slice(-2).reduce((accu, message) => {
-						if (message.direction === 'incoming') accu += `Q: ${message.message}\n`;
-						else accu += `A: ${message.message}\n`;
-						return accu;
+								if (message.direction === 'incoming') accu += `Q: ${message.message}\n`;
+								else accu += `A: ${message.message}\n`;
+								return accu;
 					}, '') }
-				).then(({ message }) => parseFloat(message) || 0);
-				// console.log('Detected enquiryOpportunity', enquiryOpportunity);
-				if (enquiryOpportunity >= 7) {
-					setEnquiryWillingness(true);
-					return 'suggestEnquiry';
+					).then(({ message }) => parseFloat(message) || 0);
+					console.log('Detected briefness', briefness);
+					if (briefness >= 7) {
+						setExplainedLengthiness(messages.length);
+						return 'explainLengthiness';
+					}
+				}
+
+				if (!disclosedEnquiryWillingness && messages.length > 3 && !tempData?.distressLevel) {
+					const enquiryOpportunity = await netlifyFunc('ai-detect-enquiry',
+					{ qna: messagesInclUserMessage.slice(-2).reduce((accu, message) => {
+								if (message.direction === 'incoming') accu += `Q: ${message.message}\n`;
+								else accu += `A: ${message.message}\n`;
+								return accu;
+					}, '') }
+					).then(({ message }) => parseFloat(message) || 0);
+					// console.log('Detected enquiryOpportunity', enquiryOpportunity);
+					if (enquiryOpportunity >= 7) {
+						setEnquiryWillingness(true);
+						return 'suggestEnquiry';
+					}
 				}
 			}
 
