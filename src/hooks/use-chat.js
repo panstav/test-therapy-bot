@@ -77,21 +77,6 @@ export default function useChat() {
 						return 'explainLengthiness';
 					}
 				}
-
-				if (!disclosedEnquiryWillingness && messages.length > 3 && !tempData?.distressLevel) {
-					const enquiryOpportunity = await runFunc('ai-detect-enquiry',
-					{ qna: messagesInclUserMessage.slice(-2).reduce((accu, message) => {
-								if (message.direction === 'incoming') accu += `Q: ${message.message}\n`;
-								else accu += `A: ${message.message}\n`;
-								return accu;
-					}, '') }
-					).then(({ message }) => parseFloat(message) || 0);
-					// console.log('Detected enquiryOpportunity', enquiryOpportunity);
-					if (enquiryOpportunity >= 7) {
-						setEnquiryWillingness(true);
-						return 'suggestEnquiry';
-					}
-				}
 			}
 
 			if (lastMessage.next) key = lastMessage.next();
@@ -177,14 +162,6 @@ export default function useChat() {
 				...option,
 				next: () => 'shouldWeContinue'
 			}))
-		},
-		suggestEnquiry: {
-			type: 'choice',
-			message: 'האם היית רוצה לחקור עוד על הנושא?',
-			options: [
-				{ label: 'כן', next: () => 'bestQuestionWithDoubt'},
-				{ label: 'לא', next: () => 'discovery'}
-			]
 		},
 		shouldWeContinue: {
 			type: 'choice',
