@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useState } from "react";
 import { Message } from "@chatscope/chat-ui-kit-react";
+import * as Sentry from "@sentry/react";
 import classNames from "classnames";
 
 import netlifyFunc from "../lib/netlify-func";
@@ -51,7 +52,7 @@ export default function useChat() {
 			if (!lastMessage?.options) {
 				// detect distress levels
 				if (!disclosedDistressLevel && !tempData?.distressLevel) {
-					const distressLevel = await netlifyFunc('ai-detect-distress',
+					const distressLevel = await runFunc('ai-detect-distress',
 					{ qna: messagesInclUserMessage.slice(-2).reduce((accu, message) => {
 								if (message.direction === 'incoming') accu += `Q: ${message.message}\n`;
 								else accu += `A: ${message.message}\n`;
@@ -63,7 +64,7 @@ export default function useChat() {
 				}
 
 				if (messages.length > 2 && (!explainedLengthiness || messages.length - explainedLengthiness >= 4) && !tempData?.distressLevel) {
-					const briefness = await netlifyFunc('ai-detect-briefness',
+					const briefness = await runFunc('ai-detect-briefness',
 					{ qna: messagesInclUserMessage.slice(-2).reduce((accu, message) => {
 								if (message.direction === 'incoming') accu += `Q: ${message.message}\n`;
 								else accu += `A: ${message.message}\n`;
@@ -78,7 +79,7 @@ export default function useChat() {
 				}
 
 				if (!disclosedEnquiryWillingness && messages.length > 3 && !tempData?.distressLevel) {
-					const enquiryOpportunity = await netlifyFunc('ai-detect-enquiry',
+					const enquiryOpportunity = await runFunc('ai-detect-enquiry',
 					{ qna: messagesInclUserMessage.slice(-2).reduce((accu, message) => {
 								if (message.direction === 'incoming') accu += `Q: ${message.message}\n`;
 								else accu += `A: ${message.message}\n`;
@@ -98,7 +99,7 @@ export default function useChat() {
 
 			if (key !== 'discretion') return key;
 
-			return netlifyFunc('ai-discretion', {
+			return runFunc('ai-discretion', {
 				qna: messages.slice(-2).reduce((accu, message) => {
 					if (message.direction === 'incoming') accu += `Q: ${message.message}\n`;
 					else accu += `A: ${message.message}\n`;
@@ -250,24 +251,33 @@ export default function useChat() {
 
 }
 
-function onceIn(min, max) {
-	return Math.random() < 1 / (min + Math.random() * (max - min));
+async function runFunc(funcName, payload) {
+
+	let res;
+	try {
+		res = await netlifyFunc(funcName, payload);
+	} catch (error) {
+		debugger;
+		if (!isDevelopment) Sentry.captureException(error);
+		return alert('שגיאת מערכת. שלחתי למערכת דו"ח של השגיאה והיא תטופל בהקדם. בינתיים - אפשר להתחיל את השיחה מחדש..');
+	}
+	return res;
 }
 
 function explainLengthiness({ messages }) {
-	return netlifyFunc('ai-explain-lengthiness', {
+	return runFunc('ai-explain-lengthiness', {
 		messages: prepMessagesForAi(messages.slice(-2))
 	});
 }
 
 function getDiscoveryQuestion({ messages }) {
-	return netlifyFunc('ai-discovery', {
+	return runFunc('ai-discovery', {
 		messages: prepMessagesForAi(messages)
 	});
 }
 
 function getBestQuestion({ messages, readyForDoubt }) {
-	return netlifyFunc('ai-best-question', {
+	return runFunc('ai-best-question', {
 		readyForDoubt,
 		messages: prepMessagesForAi(messages)
 	});

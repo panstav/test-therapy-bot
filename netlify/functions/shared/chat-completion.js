@@ -49,6 +49,8 @@ module.exports = async function completeChat(messages, { json, model = 'gpt-4o-2
 
 		const res = await openai.chat.completions.create(chatObj);
 
+		if (!res) throw new Error('No response from OpenAI');
+
 		const modelCost = modelCosts[res.model] || modelCosts['gpt-4o-2024-08-06'];
 		res.cost = new Decimal(res.usage.completion_tokens).times(modelCost.output)
 			.plus(new Decimal(res.usage.prompt_tokens).times(modelCost.input))
